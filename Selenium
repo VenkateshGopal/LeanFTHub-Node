@@ -1,0 +1,162 @@
+package projectmaven.artifact;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.openqa.grid.internal.utils.configuration.GridHubConfiguration;
+import org.openqa.grid.web.Hub;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+public class Selenium {
+	/*static Properties property = new Properties();
+	static String junitReportsDirectory = null;
+	{
+		try {
+			property.load(new FileInputStream("./buildOutput/mavenProperty.properties"));
+			junitReportsDirectory = property.getProperty("junitReportsDirectory");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}*/
+	
+	public void RegisterHub() throws Exception {
+		//Configuring & Running Hub in Localhost	
+		System.out.println("Configuring & Running Hub in Localhost");
+		GridHubConfiguration gridconfig = new GridHubConfiguration();
+		gridconfig.host = "localhost";
+		gridconfig.port = 4444;
+		Hub centralHub = new Hub(gridconfig);
+		centralHub.getConfiguration();
+		centralHub.start();
+	}
+	
+	public void seleniumRun() throws MalformedURLException, InterruptedException{
+//Connecting to Node from Hub		
+	
+		System.out.println("Connecting to Node from Hub");
+		/*String Node = "http://168.72.150.120:5545/wd/hub/";//5545
+		//String Node = "http://168.72.188.24:5545/wd/hub/";
+		//String[] Nodes = {"http://169.171.173.69:5545/wd/hub/"};
+		/*
+		*Array implementation 
+		*/
+		//String[] Nodes = {"http://168.72.188.24:5545/wd/hub/"};
+		
+		System.setProperty("webdriver.ie.driver", "C:/Selenium_3.4.0/IEDriverServer.exe");
+		DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
+		capabilities.setCapability("ignoreZoomSetting", true);
+		capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
+			System.out.println("Listening AC88 for Trade TDMS");
+      System.out.println("Listening AC88 for Trade TDMS");
+      System.out.println("Listening AC88 for Trade TDMS");
+		WebDriver[] remotedriver = {new RemoteWebDriver(new URL("http://168.72.188.24:5545/wd/hub/"),capabilities)}; //ac88 - build Validation
+     // {new RemoteWebDriver(new URL("http://168.72.151.5:5545/wd/hub/"),capabilities)}; //3a75
+			//	new RemoteWebDriver(new URL("http://168.72.150.120:5545/wd/hub/"),capabilities), //bb9e
+			//	new RemoteWebDriver(new URL("http://168.72.150.54:5545/wd/hub/"),capabilities), //7a27
+      		//	new RemoteWebDriver(new URL("http://169.171.173.69:5545/wd/hub/"),capabilities)}; //9354
+		
+		/*for(int i=0;i<Nodes.length;i++){
+				System.out.println("1");
+				remotedriver[i] = new RemoteWebDriver(new URL("http://169.171.173.69:5545/wd/hub/"),capabilities);
+				//remotedriver[i][0] = new RemoteWebDriver(new URL("http://169.171.173.69:5545/wd/hub/"),capabilities);
+				System.out.println("2");
+			} catch (MalformedURLException e1) {
+				e1.printStackTrace();
+			}
+		}*/
+      			Thread.sleep(5000);
+		for(int i=0;i<remotedriver.length;i++){
+			String currentURL = remotedriver[i].getCurrentUrl();
+			while(!(currentURL.equalsIgnoreCase("http://localhost/TeamCityReport.html")) && 
+					currentURL != null &&
+					!(currentURL.isEmpty())) {
+				try {
+					currentURL = remotedriver[i].getCurrentUrl();
+					System.out.println(currentURL);
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			};
+			
+			/*if(currentURL.equalsIgnoreCase("http://localhost/TeamCityReport.html")){
+				System.out.println(currentURL+ " found : LeanFT Execution is completed");
+				//capture result from Node browser
+				List<WebElement> htmlFiles = remotedriver[i].findElements(By.xpath("//ul[@id='teamCityReport']/li"));
+				System.out.println(htmlFiles);
+				
+				String reportNames[] = new String[htmlFiles.size()];
+				for(int j = 0;  j<reportNames.length; j++){
+					reportNames[j] = htmlFiles.get(j).getText();
+					System.out.println(reportNames[j]);
+				}
+				//String TeamCityIP = "169.172.192.156"; //TeamCity IP
+				for(String reportName : reportNames){
+					remotedriver[i].get("http://localhost/"+reportName);
+					String reportContent = remotedriver[i].findElement(By.id("junitReport")).getText();
+					//Pattern p = Pattern.compile("hostname=\".*\" name");
+			        //Matcher m = p.matcher(reportContent);
+			        
+					try {
+						//generateReport(reportName, m.replaceAll("hostname=\""+TeamCityIP+"\" name"));
+						generateReport(reportName, reportContent);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}else{
+				System.out.println(currentURL+" - do not match 'http://localhost/TeamCityReport.html'");
+			}
+			*/
+		}
+		
+		for(int i=0;i<remotedriver.length;i++){
+			remotedriver[i].quit();
+		}
+		System.out.println("Quit remotedriver");
+    }
+	
+	private void generateReport(String reportName, String reportContent) throws Exception{
+		//RemoteWebDriver
+		
+		Properties property = new Properties();
+		String junitReportsDirectory = null;
+		try {
+			property.load(new FileInputStream("./target/classes/mavenProperty.properties"));
+			junitReportsDirectory = property.getProperty("junitReportsDirectory");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Generating Report");
+		System.out.println(reportName.replaceFirst(".html", "")+".xml");
+		System.out.println(junitReportsDirectory+File.pathSeparator+reportName.replaceFirst(".html", "")+".xml");
+		File junitReportsFile = new File(junitReportsDirectory);
+		if(!(junitReportsFile.exists())){
+			junitReportsFile.mkdirs();
+		}
+		File outputXML = new java.io.File(junitReportsDirectory+File.separator+reportName.replaceFirst(".html", "")+".xml");
+		FileWriter fwriter = new FileWriter(outputXML);
+		fwriter.append(reportContent);
+		fwriter.flush();
+		fwriter.close();
+	}
+}
