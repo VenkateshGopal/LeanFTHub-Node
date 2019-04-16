@@ -1,0 +1,17 @@
+while(1){
+	if(!(netstat -a|Select-String "5096"|Select-String "LISTENING")){
+		LFTRuntime.exe
+	}
+	while((netstat -a|Select-String "168.72.188.24:5545"|Select-String "ESTABLISHED")){
+		"Connection Establised"
+		cd D:\TeamCity_Trade_Classic_TDMS
+		mvn exec:java
+		"Execution Completed"
+		while((netstat -a|Select-String "168.72.188.24:5545"|Select-String "ESTABLISHED")){
+			Start-Sleep -s 5
+		}
+		"Connection Terminated"
+	}
+	"Not ESTABLISHED"
+	Start-Sleep -s 5
+}
